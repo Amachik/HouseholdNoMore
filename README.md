@@ -1,3 +1,34 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=Amachik&project=HouseholdNoMore&lang=id">Bahasa Indonesia</a>
+      </div>
+    </div>
+  </details>
+</div>
+
 # Netflix Household No More 🚫
 
 A browser extension aiming to bypass the Netflix household verification prompts by employing different strategies depending on the page context.
