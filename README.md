@@ -19,7 +19,7 @@ A browser extension aiming to bypass the Netflix household verification prompts 
 
 **Mozilla Firefox:** https://addons.mozilla.org/cs/firefox/addon/netflix-household-no-more/
 
-**Google Chrome / Microsoft Edge / Chromium Browsers:** Extension not published yet.
+**Google Chrome / Microsoft Edge / Chromium Browsers:** Extension not published yet. (Waiting for approval)
 
 
 ## Installation (Local Development/Testing)
@@ -32,7 +32,7 @@ As this extension is not published yet on chrome store, you need to load it manu
 2.  Open your browser and navigate to `chrome://extensions` (or `edge://extensions`).
 3.  Enable **Developer mode** (usually a toggle in the top-right corner).
 4.  Click the **Load unpacked** button.
-5.  Select the directory where you saved the extension files (the folder containing `manifest.json`).
+5.  Select the directory where you saved the extension files. In folder build_tools/build/chrome/ (the folder containing `manifest.json`).
 6.  The extension should now be loaded and active.
 
 **Mozilla Firefox:**
@@ -41,8 +41,8 @@ As this extension is not published yet on chrome store, you need to load it manu
 2.  Open Firefox and navigate to `about:debugging`.
 3.  Click on **This Firefox** in the left sidebar.
 4.  Click the **Load Temporary Add-on...** button.
-5.  Navigate to the directory where you saved the extension files.
-6.  Select the **`manifest.json`** file itself.
+5.  Navigate to the directory where you saved the extension files. In folder build_tools/build/firefox/ you need to extract the zip folder.
+6.  Select the **`manifest.json`** file itself inside the extracted folder.
 7.  The extension should now be loaded and active for the current browser session.
     *   **Note:** Firefox temporary add-ons are removed when you close the browser. You will need to reload it each time you restart Firefox.
 
