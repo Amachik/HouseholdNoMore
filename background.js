@@ -5,6 +5,10 @@ const WATCH_PATH = '/watch/';
 const CONTENT_SCRIPT_FILE = 'content.js';
 const STORAGE_KEY = 'extensionEnabled';
 
+// --- Browser Compatibility ---
+const isFirefox = !chrome.declarativeNetRequest;
+const tabsToBlockOnFirefox = new Set();
+
 let isExtensionEnabled = true;
 
 // --- Extension State & Cleanup ---
@@ -27,6 +31,11 @@ async function updateEnabledState() {
 }
 
 async function removeAllRules() {
+    if (isFirefox) {
+        console.log('[Cleanup] Clearing all Firefox blocking rules.');
+        tabsToBlockOnFirefox.clear();
+        return;
+    }
     try {
         const currentRules = await chrome.declarativeNetRequest.getSessionRules();
         const ruleIdsToRemove = currentRules.map(rule => rule.id);
@@ -43,6 +52,13 @@ async function removeAllRules() {
 
 async function addBlockRuleForTab(tabId) {
     if (!isExtensionEnabled) return;
+    if (isFirefox) {
+        if (!tabsToBlockOnFirefox.has(tabId)) {
+            console.log(`[Network Rule] Adding rule for tab ${tabId} to Firefox block list.`);
+            tabsToBlockOnFirefox.add(tabId);
+        }
+        return;
+    }
     try {
         const ruleId = tabId;
         const currentRules = await chrome.declarativeNetRequest.getSessionRules();
@@ -70,6 +86,13 @@ async function addBlockRuleForTab(tabId) {
 }
 
 async function removeBlockRuleForTab(tabId) {
+    if (isFirefox) {
+        if (tabsToBlockOnFirefox.has(tabId)) {
+            console.log(`[Network Rule] Removing rule for tab ${tabId} from Firefox block list.`);
+            tabsToBlockOnFirefox.delete(tabId);
+        }
+        return;
+    }
     try {
         const ruleId = tabId;
         const currentRules = await chrome.declarativeNetRequest.getSessionRules();
@@ -105,6 +128,13 @@ async function injectContentScript(tabId) {
 // --- Browser Event Listeners & Logic ---
 
 async function removeSpecificBlockRuleForTab(tabId) {
+    if (isFirefox) {
+        if (tabsToBlockOnFirefox.has(tabId)) {
+            console.log(`[Network Rule] Removing rule for tab ${tabId} from Firefox block list.`);
+            tabsToBlockOnFirefox.delete(tabId);
+        }
+        return;
+    }
     try {
         const ruleId = tabId;
         await chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [ruleId] });
@@ -115,6 +145,7 @@ async function removeSpecificBlockRuleForTab(tabId) {
 
 function handleTabState(tabId, url) {
     if (!isExtensionEnabled) {
+        removeSpecificBlockRuleForTab(tabId); 
         return;
     }
 
@@ -126,13 +157,15 @@ function handleTabState(tabId, url) {
     if (url.includes(WATCH_PATH)) {
         addBlockRuleForTab(tabId);
     } else {
-        removeSpecificBlockRuleForTab(tabId);
+        // For Firefox, we don't remove the rule on SPA navigation, only when leaving the domain.
+        if (!isFirefox) {
+            removeSpecificBlockRuleForTab(tabId);
+        }
         injectContentScript(tabId);
     }
 }
 
-// This is the correct set of event listeners.
-// All others were duplicates and have been removed.
+
 
 chrome.webNavigation.onBeforeNavigate.addListener((details) => {
     if (!isExtensionEnabled) return;
@@ -199,5 +232,21 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 
 updateEnabledState();
+
+// --- Firefox-specific webRequest Listener ---
+if (isFirefox) {
+    chrome.webRequest.onBeforeRequest.addListener(
+        (details) => {
+            if (tabsToBlockOnFirefox.has(details.tabId)) {
+                console.log(`[Firefox] Blocking request for tab ${details.tabId}:`, details.url);
+                return { cancel: true };
+            }
+            return { cancel: false };
+        },
+        { urls: [GRAPHQL_URL], types: ["xmlhttprequest"] },
+        ["blocking"]
+    );
+    console.log("Firefox webRequest listener initialized.");
+}
 
 console.log("Netflix Household Bypass background script loaded.");

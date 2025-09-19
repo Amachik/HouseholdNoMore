@@ -13,38 +13,22 @@ if (window.hasRunNetflixBypassContentScript) {
     // console.log("NF Bypass Content Script injected and running for the first time.");
 
     const MODAL_SELECTOR = '.nf-modal.interstitial-full-screen';
-    const MODAL_DATA_UIA_SELECTOR = 'div[data-uia="clcsModal"]'; // More specific inner content
+    const BACKGROUND_SELECTOR = '.nf-modal-background[data-uia="nf-modal-background"]';
 
-    function hideModal(node) {
-        // Check if the node itself is the modal container or contains the specific modal content
-        if (node.matches && (node.matches(MODAL_SELECTOR) || node.querySelector(MODAL_DATA_UIA_SELECTOR))) {
-            // console.log("NF Bypass: Found modal, hiding.", node);
-            // Hide the outermost matching modal container
-            let modalToHide = node.matches(MODAL_SELECTOR) ? node : node.closest(MODAL_SELECTOR);
-            if (modalToHide) {
-                modalToHide.style.setProperty('display', 'none', 'important');
-            }
-            // Also hide the background if it exists separately
-            let background = document.querySelector('.nf-modal-background[data-uia="nf-modal-background"]');
-            if (background) {
-                background.style.setProperty('display', 'none', 'important');
-            }
+    function findAndRemoveModal(node) {
+        // If the added node is a modal, remove it and its background
+        if (node.matches && node.matches(MODAL_SELECTOR)) {
+            node.remove();
+            document.querySelector(BACKGROUND_SELECTOR)?.remove();
+            return; // Done with this node
+        }
 
-        } else if (node.querySelectorAll) {
-            // Check if added nodes contain the modal
-            const modals = node.querySelectorAll(MODAL_SELECTOR);
-            modals.forEach(modal => {
-                // Verify it contains the specific inner content before hiding
-                if (modal.querySelector(MODAL_DATA_UIA_SELECTOR)) {
-                    // console.log("NF Bypass: Found modal within added node, hiding.", modal);
-                    modal.style.setProperty('display', 'none', 'important');
-                    // Also hide the background if it exists separately
-                    let background = document.querySelector('.nf-modal-background[data-uia="nf-modal-background"]');
-                    if (background) {
-                        background.style.setProperty('display', 'none', 'important');
-                    }
-                }
-            });
+        // If the added node contains modals, remove them
+        if (node.querySelectorAll) {
+            node.querySelectorAll(MODAL_SELECTOR).forEach(modal => modal.remove());
+            // Also try to remove the background if it was added in the same batch
+            const background = node.querySelector(BACKGROUND_SELECTOR);
+            if (background) background.remove();
         }
     }
 
@@ -52,13 +36,12 @@ if (window.hasRunNetflixBypassContentScript) {
 
     const observer = new MutationObserver((mutationsList) => {
         for (const mutation of mutationsList) {
-            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                mutation.addedNodes.forEach(node => {
-                    // Check if the added node itself is/contains the modal
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        hideModal(node);
-                    }
-                });
+            if (mutation.type !== 'childList') continue;
+
+            for (const node of mutation.addedNodes) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    findAndRemoveModal(node);
+                }
             }
         }
     });
@@ -69,9 +52,12 @@ if (window.hasRunNetflixBypassContentScript) {
         subtree: true
     });
 
-    // console.log("NF Bypass: MutationObserver is running.");
+    // Initial check to remove any modals or backgrounds present on load
+    function initialCleanup() {
+        document.querySelectorAll(MODAL_SELECTOR).forEach(modal => modal.remove());
+        document.querySelector(BACKGROUND_SELECTOR)?.remove();
+    }
 
-    // Initial check in case the modal is already present when the script loads
-    document.querySelectorAll(MODAL_SELECTOR).forEach(hideModal);
+    initialCleanup();
 
 } 

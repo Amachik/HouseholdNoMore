@@ -4,11 +4,12 @@
   "version": "1.9",
   "description": "Blocks GraphQL on /watch, hides modal on /browse.",
   "permissions": [
-    "declarativeNetRequest",
     "tabs",
     "webNavigation",
     "scripting",
     "storage",
+    "webRequest",
+    "webRequestBlocking",
     "*://*.netflix.com/*"
   ],
   "background": {

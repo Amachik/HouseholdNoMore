@@ -1,50 +1,43 @@
-const toggleSwitch = document.getElementById('toggleSwitch');
-const statusIndicator = document.getElementById('statusIndicator');
-const statusText = document.getElementById('statusText');
-const storageKey = 'extensionEnabled';
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleSwitch = document.getElementById('toggleSwitch');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    const storageKey = 'extensionEnabled';
 
-// Update status indicator based on toggle state
-function updateStatusIndicator(isEnabled) {
-    if (isEnabled) {
-        statusIndicator.classList.remove('status-inactive');
-        statusIndicator.classList.add('status-active');
-        statusText.textContent = 'Extension is active';
-    } else {
-        statusIndicator.classList.remove('status-active');
-        statusIndicator.classList.add('status-inactive');
-        statusText.textContent = 'Extension is disabled';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-    // Get the current state from storage and set the switch
-    try {
-        const data = await chrome.storage.local.get(storageKey);
-        // Default to enabled if not set
-        const isEnabled = data[storageKey] !== false;
+    // Function to update the UI based on the extension's state
+    function updateUI(isEnabled) {
+        statusIndicator.classList.toggle('status-active', isEnabled);
+        statusIndicator.classList.toggle('status-inactive', !isEnabled);
+        statusText.textContent = `Extension is ${isEnabled ? 'active' : 'disabled'}`;
         toggleSwitch.checked = isEnabled;
-        updateStatusIndicator(isEnabled);
-    } catch (error) {
-        console.error("Error getting initial state:", error);
-        toggleSwitch.checked = true; // Default to enabled on error
-        updateStatusIndicator(true);
     }
-});
 
-toggleSwitch.addEventListener('change', async () => {
-    // Save the new state to storage
-    const newState = toggleSwitch.checked;
-    
-    // Update status indicator immediately for better UX
-    updateStatusIndicator(newState);
-    
-    try {
-        await chrome.storage.local.set({ [storageKey]: newState });
-        console.log(`Extension state set to: ${newState}`);
-    } catch (error) {
-        console.error("Error setting state:", error);
-        // Revert the switch and status if saving fails
-        toggleSwitch.checked = !newState;
-        updateStatusIndicator(!newState);
+    // Main function to initialize the popup
+    async function initialize() {
+        try {
+            const data = await chrome.storage.local.get(storageKey);
+            const isEnabled = data[storageKey] !== false; // Default to true
+            updateUI(isEnabled);
+        } catch (error) {
+            console.error("Error initializing popup:", error);
+            updateUI(true); // Default to enabled on error
+        }
     }
+
+    // Event listener for the toggle switch
+    toggleSwitch.addEventListener('change', async () => {
+        const newState = toggleSwitch.checked;
+        updateUI(newState); // Update UI immediately for responsiveness
+
+        try {
+            await chrome.storage.local.set({ [storageKey]: newState });
+        } catch (error) {
+            console.error("Error saving state:", error);
+            // Revert UI on failure
+            updateUI(!newState);
+        }
+    });
+
+    // Initialize the popup when the DOM is ready
+    initialize();
 });
