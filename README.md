@@ -19,7 +19,7 @@ A browser extension aiming to bypass the Netflix household verification prompts 
 
 **Mozilla Firefox:** https://addons.mozilla.org/cs/firefox/addon/netflix-household-no-more/
 
-**Google Chrome / Microsoft Edge / Chromium Browsers:** Extension not published yet. (Waiting for approval)
+**Google Chrome / Microsoft Edge / Chromium Browsers:** Extension wont be published there. (approval for upload was denied)
 
 
 ## Installation (Local Development/Testing)
