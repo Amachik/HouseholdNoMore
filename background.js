@@ -1,6 +1,6 @@
 // Netflix Household Bypass - Background Script
-
-const GRAPHQL_URL = "*://web.prod.cloud.netflix.com/graphql*";
+const GRAPHQL_URL = "*://*.netflix.com/graphql*";
+// OLD PATH    -->   "*://web.prod.cloud.netflix.com/graphql*";
 const WATCH_PATH = '/watch/';
 const CONTENT_SCRIPT_FILE = 'content.js';
 const STORAGE_KEY = 'extensionEnabled';
