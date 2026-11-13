@@ -1,0 +1,2 @@
+build_tools/build/chrome/*
+!build_tools/build/chrome/netflix-bypass-chrome.zip

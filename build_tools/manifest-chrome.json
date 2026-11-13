@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Netflix Household Bypass",
-  "version": "2.1",
-  "description": "Blocks GraphQL on /watch, hides modal on /browse.",
+  "version": "2.3",
+  "description": "Handles Netflix household screens while preserving native playback controls and player requests.",
   "permissions": [
     "declarativeNetRequest",
     "tabs",
-    "webNavigation",
     "scripting",
     "storage"
   ],
@@ -16,6 +15,27 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.netflix.com/*"
+      ],
+      "js": [
+        "player.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://*.netflix.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -29,10 +49,5 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "netflix-household-no-more@yourdomain.com",
-      "strict_min_version": "109.0"
-    }
-  }
+  "minimum_chrome_version": "111"
 }
