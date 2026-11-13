@@ -35,6 +35,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error saving state:", error);
             // Revert UI on failure
             updateUI(!newState);
+            return;
+        }
+
+        // Applying the toggle to an already-open playback dialog requires a
+        // fresh player initialization so Netflix mounts its native controls.
+        try {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab?.url) {
+                const url = new URL(tab.url);
+                if ((url.hostname === 'netflix.com' || url.hostname.endsWith('.netflix.com')) &&
+                    url.pathname.startsWith('/watch/')) await chrome.tabs.reload(tab.id);
+            }
+        } catch (error) {
+            console.warn('Reload Netflix to apply the updated setting:', error);
         }
     });
 

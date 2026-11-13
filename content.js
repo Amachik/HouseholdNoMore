@@ -1,4 +1,4 @@
-// Runs on browse AND watch pages, including Netflix's client-side navigation.
+// Share the saved toggle with player.js and handle browse-page overlays.
 (() => {
     const CONTROLLER_KEY = '__householdNoMoreController';
     if (window[CONTROLLER_KEY]) return;
@@ -9,8 +9,23 @@
     const LEGACY_MODAL_SELECTOR = '.nf-modal.interstitial-full-screen, .nf-modal.uma-modal.two-section-uma';
     const hiddenOverlays = new Map();
     let enabled = false;
+    let stateReady = false;
     let scheduledFrame = null;
     let stateRevision = 0;
+
+    function publishState() {
+        if (stateReady) window.postMessage({ type: 'household-no-more:state', enabled }, location.origin);
+    }
+
+    window.addEventListener('message', event => {
+        if (event.source === window && event.origin === location.origin &&
+            event.data?.type === 'household-no-more:request-state') publishState();
+    });
+
+    function restoreOverlay(overlay, { value, priority }) {
+        if (value) overlay.style.setProperty('display', value, priority);
+        else overlay.style.removeProperty('display');
+    }
 
     function hideHouseholdOverlays() {
         if (!enabled) return;
@@ -18,12 +33,16 @@
             if (!overlay.isConnected) hiddenOverlays.delete(overlay);
         }
 
-        document.querySelectorAll(MODAL_SELECTOR).forEach(modal => {
+        const overlays = new Set();
+        // A playback dialog must be handled before Netflix opens it. CSS hiding
+        // leaves the player minimized and its native controls unmounted.
+        if (!location.pathname.startsWith('/watch/')) document.querySelectorAll(MODAL_SELECTOR).forEach(modal => {
             // clcsModal is also used for unrelated dialogs. Only hide the
             // household prompt identified in the current Netflix UI.
             if (!modal.matches(LEGACY_MODAL_SELECTOR) && !modal.querySelector(HOUSEHOLD_MARKERS)) return;
 
             const overlay = modal.closest('[data-uia="nf-modal-background"]') || modal;
+            overlays.add(overlay);
             if (!hiddenOverlays.has(overlay)) {
                 hiddenOverlays.set(overlay, {
                     value: overlay.style.getPropertyValue('display'),
@@ -32,6 +51,13 @@
             }
             // Preserve React's DOM so future navigation and dialogs still work.
             overlay.style.setProperty('display', 'none', 'important');
+        });
+        // Netflix can reuse a modal's background for another dialog or route.
+        hiddenOverlays.forEach((original, overlay) => {
+            if (!overlays.has(overlay)) {
+                restoreOverlay(overlay, original);
+                hiddenOverlays.delete(overlay);
+            }
         });
     }
 
@@ -45,6 +71,8 @@
 
     function setEnabled(nextEnabled) {
         enabled = nextEnabled;
+        stateReady = true;
+        publishState();
         observer.disconnect();
         if (scheduledFrame !== null) {
             cancelAnimationFrame(scheduledFrame);
@@ -52,6 +80,7 @@
         }
 
         if (enabled) {
+            if (!document.documentElement) return;
             observer.observe(document.documentElement, {
                 childList: true,
                 subtree: true,
@@ -60,10 +89,7 @@
             });
             hideHouseholdOverlays();
         } else {
-            hiddenOverlays.forEach(({ value, priority }, overlay) => {
-                if (value) overlay.style.setProperty('display', value, priority);
-                else overlay.style.removeProperty('display');
-            });
+            hiddenOverlays.forEach((original, overlay) => restoreOverlay(overlay, original));
             hiddenOverlays.clear();
         }
     }
@@ -76,6 +102,9 @@
     }
 
     window[CONTROLLER_KEY] = { setEnabled };
+    document.addEventListener('DOMContentLoaded', () => {
+        if (stateReady) setEnabled(enabled);
+    }, { once: true });
     chrome.storage.onChanged.addListener(onStorageChanged);
     const initialRevision = stateRevision;
     chrome.storage.local.get(STORAGE_KEY).then(data => {

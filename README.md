@@ -5,17 +5,18 @@
 
 # Netflix Household No More 🚫
 
-A browser extension that hides Netflix household verification overlays on browse and watch pages.
+A browser extension that handles Netflix household screens while preserving the native player controls.
 
-**Supports:** `Chrome` (and Chromium-based browsers like Edge) | `Firefox`
+**Supports:** `Chrome 111+` (and compatible Chromium-based browsers like Edge) | `Firefox 128+`
 
 ---
 
 ## Features
 
-*   **Keeps Player Requests Working:** Allows GraphQL requests needed to start playback. Version 2.1's blanket GraphQL filter could leave the player stuck on a loading spinner.
-*   **Hides Household Overlays:** Handles the current household modal on both browse and watch pages, including navigation within Netflix.
-*   **Reversible Toggle:** Turning the extension off restores overlays it has hidden.
+*   **Keeps Player Requests Working:** Allows GraphQL requests needed for playback, episode information, and audio tracks.
+*   **Preserves Native Controls:** Handles recognized household screens in the playback-interstitial response before Netflix opens a dialog. Volume, episode selection, audio/subtitles, and the other native controls stay available.
+*   **Browse Overlay Handling:** Hides household overlays on browse pages, including navigation within Netflix.
+*   **Reversible Toggle:** Changing the setting reloads the active Netflix watch tab to apply it. On browse pages, turning the extension off restores overlays it has hidden.
 *   **Target:** Only affects `netflix.com` domains.
 
 
@@ -58,10 +59,18 @@ After rebuilding an installed unpacked extension, click its **Reload** button in
 
 ## Caveats & Known Issues
 
-*   **Netflix Video player UI is not visible:** If u dont see the video player UI, just refresh the page. that should fix it for you.
+*   **After an Extension Update:** Reload the extension and refresh Netflix so the playback handler runs before the player initializes. Version 2.2 hid playback dialogs after they opened, which could leave the native controls missing.
 
-*   **Netflix Updates:** Changes to the household modal's attributes or HTML structure can break overlay detection. The extension does not change server-side playback authorization.
+*   **Netflix Updates:** Changes to the playback-interstitial operation, response schema, or household markers can break detection. Unrecognized responses pass through unchanged. The extension does not change server-side playback authorization.
 *   **Fragile css:** The modal hiding relies on specific CSS class names and `data-uia` attributes. These might change without notice.
+
+---
+
+## Development Checks
+
+Run `node --test tests/player.test.cjs` to verify targeted response handling, state synchronization, request preservation, and unrelated-dialog behavior. These tests use Node's built-in test runner and require no installed dependencies.
+
+The playback handler runs at `document_start` in the page's `MAIN` execution world. Firefox requires version 128 or newer for this capability.
 
 ---
 

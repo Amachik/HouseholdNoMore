@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Netflix Household Bypass",
-  "version": "2.2",
-  "description": "Hides household overlays on Netflix browse and watch pages without blocking player requests.",
+  "version": "2.3",
+  "description": "Handles Netflix household screens while preserving native playback controls and player requests.",
   "permissions": [
     "declarativeNetRequest",
     "tabs",
@@ -15,11 +15,27 @@
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [{
-    "matches": ["*://*.netflix.com/*"],
-    "js": ["content.js"],
-    "run_at": "document_idle"
-  }],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.netflix.com/*"
+      ],
+      "js": [
+        "player.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://*.netflix.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -32,5 +48,6 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "minimum_chrome_version": "111"
 }
