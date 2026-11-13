@@ -68,7 +68,7 @@ After rebuilding an installed unpacked extension, click its **Reload** button in
 
 ## Development Checks
 
-Run `node --test tests/player.test.cjs` to verify targeted response handling, state synchronization, request preservation, and unrelated-dialog behavior. These tests use Node's built-in test runner and require no installed dependencies.
+Run `node --test tests/*.test.cjs` to verify targeted response handling, state synchronization, request preservation, and restoration of detached or reused overlays. These tests use Node's built-in test runner and require no installed dependencies.
 
 The playback handler runs at `document_start` in the page's `MAIN` execution world. Firefox requires version 128 or newer for this capability.
 

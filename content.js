@@ -29,8 +29,11 @@
 
     function hideHouseholdOverlays() {
         if (!enabled) return;
-        for (const overlay of hiddenOverlays.keys()) {
-            if (!overlay.isConnected) hiddenOverlays.delete(overlay);
+        for (const [overlay, original] of hiddenOverlays) {
+            if (!overlay.isConnected) {
+                restoreOverlay(overlay, original);
+                hiddenOverlays.delete(overlay);
+            }
         }
 
         const overlays = new Set();
